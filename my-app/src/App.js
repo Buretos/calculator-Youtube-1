@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import styles from './App.module.css';
 
 function App() {
 	// Инициализация состояния калькулятора
@@ -7,7 +8,7 @@ function App() {
 	const [result, setResult] = useState('');
 
 	// Операторы калькулятора
-	const ops = ['/', '*', '+', '-', '.'];
+	const ops = ['+', '-', 'C', '='];
 
 	// Функция для обновления состояния калькулятора
 	const updateCalc = (value) => {
@@ -31,17 +32,17 @@ function App() {
 
 	// Функция для создания кнопок с цифрами
 	const createDigits = () => {
-		const digits = [];
+		const NUMS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0];
 
-		for (let i = 1; i < 10; i++) {
-			digits.push(
-				<button onClick={() => updateCalc(i.toString())} key={i}>
-					{i}
-				</button>,
+		const numbersButtons = NUMS.map((number) => {
+			return (
+				<button onClick={() => updateCalc(number.toString())} key={number}>
+					{number}
+				</button>
 			);
-		}
+		});
 
-		return digits;
+		return numbersButtons;
 	};
 
 	// Функция для выполнения вычислений
@@ -64,33 +65,37 @@ function App() {
 	};
 
 	return (
-		<div className="App">
-			<div className="calculator">
-				<div className="display">
+		<div className={styles.App}>
+			<div className={styles.calculator}>
+				<div className={styles.display}>
 					{result ? <span>({result})</span> : ''}&nbsp;
 					{calc || '0'} {/* Если есть результат выводим его, иначе - 0 */}
 				</div>
 
-				<div className="operators">
-					<button onClick={() => updateCalc('/')}>/</button>{' '}
-					{/* Обработчик клика для добавления оператора / */}
-					<button onClick={() => updateCalc('*')}>*</button>{' '}
-					{/* Обработчик клика для добавления оператора * */}
-					<button onClick={() => updateCalc('+')}>+</button>{' '}
+				<div className={styles.operators}>
+					<button
+						className={styles.operatorsButton}
+						onClick={() => updateCalc('+')}
+					>
+						+
+					</button>{' '}
 					{/* Обработчик клика для добавления оператора + */}
-					<button onClick={() => updateCalc('-')}>-</button>{' '}
+					<button
+						className={styles.operatorsButton}
+						onClick={() => updateCalc('-')}
+					>
+						-
+					</button>{' '}
 					{/* Обработчик клика для добавления оператора - */}
-					<button onClick={deleteLast}>DEL</button>{' '}
-					{/* Обработчик клика для удаления последнего символа */}
 				</div>
 
-				<div className="digits">
+				<div className={styles.digits}>
 					{createDigits()} {/* Создаем кнопки с цифрами */}
-					<button onClick={() => updateCalc('0')}>0</button>{' '}
-					{/* Обработчик клика для добавления цифры 0 */}
-					<button onClick={() => updateCalc('.')}>.</button>{' '}
-					{/* Обработчик клика для добавления десятичной точки */}
-					<button onClick={calculate}>=</button>{' '}
+					<button className={styles.digitsButton}>C</button>{' '}
+					{/* Нужно поставить обработчик клика для сброса всех значений */}
+					<button className={styles.digitsButton} onClick={calculate}>
+						=
+					</button>{' '}
 					{/* Обработчик клика для выполнения вычислений */}
 				</div>
 			</div>
