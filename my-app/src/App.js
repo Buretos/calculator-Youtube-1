@@ -2,41 +2,34 @@ import { useState } from 'react';
 import styles from './App.module.css';
 
 function App() {
-	// Инициализация состояния калькулятора
-	const [calc, setCalc] = useState('');
-	// Инициализация состояния результата
-	const [result, setResult] = useState('');
+	const [operand1, setOperand1] = useState('');
+	const [operand2, setOperand2] = useState('');
+	const [operator, setOperator] = useState('');
+	const [isResult, setIsResult] = useState(false);
 
-	// Операторы калькулятора
-	const ops = ['+', '-', 'C', '='];
-
-	// Функция для обновления состояния калькулятора
-	const updateCalc = (value) => {
-		// Проверяем, возможность добавления оператора
-		if (
-			(ops.includes(value) && calc === '') || // Если оператор первый символ или
-			(ops.includes(value) && ops.includes(calc.slice(-1))) // если предыдущий символ уже оператор
-		) {
-			return; // Возвращаемся, не обновляя состояние
-		}
-
-		// Обновляем состояние калькулятора, добавляя введенный символ
-		setCalc(calc + value);
-
-		// Проверяем, является ли символ оператором
-		if (!ops.includes(value)) {
-			// Если символ не оператор, вычисляем результат и обновляем состояние результата
-			setResult(eval(calc + value).toString());
+	// Функция для обновления состояния операндов
+	const updateOperand = (value) => {
+		// Проверяем, какие операнды обновлять. Если оператор есть то второй, если нет то первый
+		if (!operator) {
+			setOperand1(operand1 + value);
+		} else {
+			setOperand2(operand2 + value);
 		}
 	};
 
 	// Функция для создания кнопок с цифрами
 	const createDigits = () => {
-		const NUMS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0];
+		const NUMS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'];
 
 		const numbersButtons = NUMS.map((number) => {
 			return (
-				<button onClick={() => updateCalc(number.toString())} key={number}>
+				<button
+					onClick={() => {
+						updateOperand(number);
+						setIsResult(false);
+					}}
+					key={number}
+				>
 					{number}
 				</button>
 			);
@@ -46,57 +39,97 @@ function App() {
 	};
 
 	// Функция для выполнения вычислений
-	const calculate = () => {
-		// Вычисляем результат и обновляем состояние результата
-		setCalc(eval(calc).toString());
-	};
+	const resultat = () => {
+		let op1 = 0;
+		const op2 = parseInt(operand2);
 
-	// Функция для удаления последнего символа
-	const deleteLast = () => {
-		if (calc === '') {
-			// Проверяем, пустая ли строка
-			return; // Возвращаемся, нет символов для удаления
+		if (operand1) {
+			op1 = parseInt(operand1);
+		}
+		if (!operand2) {
+			return;
 		}
 
-		const value = calc.slice(0, -1); // Удаляем последний символ
+		// Вычисляем результат и обновляем до состояния результата
+		if (operator === '-') {
+			const resPlus = op1 - op2;
+			setOperand1(resPlus.toString());
+		}
 
-		// Обновляем состояние калькулятора
-		setCalc(value);
+		if (operator === '+') {
+			const resMinus = op1 + op2;
+			setOperand1(resMinus.toString());
+		}
+		setOperand2('');
+		setOperator('');
+	};
+
+	// Функция для перевода калькуляторя в первоначальное состояние
+	const clear = () => {
+		// Обновляем состояние калькулятора до первоначального
+		setOperand1('');
+		setOperand2('');
+		setOperator('');
 	};
 
 	return (
 		<div className={styles.App}>
 			<div className={styles.calculator}>
-				<div className={styles.display}>
-					{result ? <span>({result})</span> : ''}&nbsp;
-					{calc || '0'} {/* Если есть результат выводим его, иначе - 0 */}
+				<div className={`${styles.display} ${isResult ? styles.highlight : ''}`}>
+					{/* Если есть результат выводим его, иначе - 0 */}
+					{operand1 || '0'} {operator} {operand2}
 				</div>
-
+				{/* Блок кнопок операторов */}
 				<div className={styles.operators}>
+					{/* Кнопка плюс */}
 					<button
 						className={styles.operatorsButton}
-						onClick={() => updateCalc('+')}
+						onClick={() => {
+							if (!operator) {
+								setOperator('+');
+							}
+							setIsResult(false);
+						}}
 					>
 						+
-					</button>{' '}
-					{/* Обработчик клика для добавления оператора + */}
+					</button>
+					{/* Кнопка минус */}
 					<button
 						className={styles.operatorsButton}
-						onClick={() => updateCalc('-')}
+						onClick={() => {
+							if (!operator) {
+								setOperator('-');
+							}
+							setIsResult(false);
+						}}
 					>
 						-
-					</button>{' '}
-					{/* Обработчик клика для добавления оператора - */}
+					</button>
 				</div>
-
+				{/* Блок кнопок в стиле цифровых  */}
 				<div className={styles.digits}>
-					{createDigits()} {/* Создаем кнопки с цифрами */}
-					<button className={styles.digitsButton}>C</button>{' '}
-					{/* Нужно поставить обработчик клика для сброса всех значений */}
-					<button className={styles.digitsButton} onClick={calculate}>
+					{/* Создаем кнопки с цифрами */}
+					{createDigits()}
+					{/* Кнопка С */}
+					<button
+						className={styles.digitsButton}
+						onClick={() => {
+							setIsResult(false);
+							clear();
+						}}
+					>
+						C
+					</button>
+					{/* Кнопка = */}
+					<button
+						className={styles.digitsButton}
+						onClick={() => {
+							setIsResult(true);
+							resultat();
+						}}
+					>
 						=
-					</button>{' '}
-					{/* Обработчик клика для выполнения вычислений */}
+					</button>
 				</div>
 			</div>
 		</div>
